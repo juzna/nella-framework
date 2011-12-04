@@ -14,7 +14,7 @@ namespace Nella\Application\UI;
  *
  * @author	Patrik Votoček
  *
- * @property-read \Nette\DI\IContext $context
+ * @property-read \Nette\DI\IContainer $context
  */
 abstract class Presenter extends \Nette\Application\UI\Presenter
 {
