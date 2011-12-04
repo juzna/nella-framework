@@ -20,9 +20,9 @@ interface IComponentContainer
 {
 	/**
 	 * Adds the specified component
-	 * 
-	 * @param \Nette\ComponentModel\IComponent|\Nette\Callback|\Closure|array
+	 *
 	 * @param string
+	 * @param \Nette\ComponentModel\IComponent|\Nette\Callback|\Closure|array
 	 * @return void
 	 */
 	public function addComponent($name, $component);
