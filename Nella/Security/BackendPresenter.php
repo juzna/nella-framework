@@ -38,13 +38,13 @@ class BackendPresenter extends \Nella\Application\UI\BackendPresenter
 		$credentials = $service->repository->findOneByIdentity($id);
 
 		if (!$credentials) {
-			$this->flashMessage("User with id $id does not exist", 'succes');
+			$this->flashMessage("User with id $id does not exist", 'success');
 			$this->redirect(':Security:Backend:');
 		}
 
 		$service->delete($credentials);
 		$this->logAction("Security", \Nella\Utils\IActionLogger::DELETE, "Removed user {$credentials->username}");
-		$this->flashMessage("User '{$credentials->username}' successfuly removed", 'success');
+		$this->flashMessage("User '{$credentials->username}' successfully removed", 'success');
 		$this->redirect(':Security:Backend:');
 	}
 
