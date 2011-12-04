@@ -53,15 +53,31 @@ class DebugBarPanel extends \Nette\Object implements \Nette\Diagnostics\IBarPane
 	{
 		$ref = new \Nette\Reflection\Property('Nette\DI\Container', 'registry');
 		$ref->setAccessible(TRUE);
+
+		$ref2 = new \Nette\Reflection\Property('Nette\DI\Container', 'factories');
+		$ref2->setAccessible(TRUE);
+
 		$registry = $ref->getValue($this->container);
+		$factories = $ref2->getValue($this->container);
+
+		// all services
+		$serviceNames = array_unique(array_merge(array_keys($registry), array_keys($factories)));
+		sort($serviceNames);
+
 		$services = array();
-		foreach ($registry as $name => $service) {
-			$type = gettype($service);
-			if ($service == NULL || $type == "NULL") {
-				continue;
-			} elseif ($type == "object") {
-				$type = get_class($service);
+		foreach ($serviceNames as $name) {
+			if (isset($registry[$name])) {
+				$service = $registry[$name];
+				$type = gettype($service);
+				if ($service == NULL || $type == "NULL") {
+					$type = NULL;
+				} elseif ($type == "object") {
+					$type = get_class($service);
+				}
+			} elseif (isset($factories[$name])) {
+				$type = null;
 			}
+
 			$services[] = array(
 				'name' => $name,
 				'type' => $type,
