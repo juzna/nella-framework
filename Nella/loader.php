@@ -9,9 +9,13 @@
 
 use Nette\Diagnostics\Debugger;
 
+if (!defined('LIBS_DIR')) {
+    define ('LIBS_DIR', __DIR__ . "/../");
+}
+
 // Load and init Nette Framework
 if (!defined('NETTE')) {
-	require_once __DIR__ . "/../Nette/loader.php";
+	require_once LIBS_DIR . "/Nette/loader.php";
 }
 
 // Set debug options
@@ -28,8 +32,8 @@ define('NELLA_FRAMEWORK_VERSION_ID', 20000); // v2.0.0
 require_once __DIR__ . "/SplClassLoader.php";
 Nella\SplClassLoader::getInstance(array(
 	'Nella' => NELLA_FRAMEWORK_DIR,
-	'Doctrine' => __DIR__ . "/../Doctrine",
-	'Symfony' => __DIR__ . "/../Symfony",
+	'Doctrine' => LIBS_DIR . "/Doctrine",
+	'Symfony' => LIBS_DIR . "/Symfony",
 ))->register();
 
 require_once __DIR__ . "/shortcuts.php";
