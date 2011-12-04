@@ -83,8 +83,8 @@ class Configurator extends \Nette\Configurator
 				\Nella\Diagnostics\CallbackBarPanel::register($bar, $container);
 				\Nella\Diagnostics\VersionBarPanel::register($bar, $container->cacheStorage);
 				$bar->addPanel($container->debugPanel);
-				$container->translatorPanel;
-				$container->userPanel;
+				$bar->addPanel($container->translatorPanel);
+				$bar->addPanel($container->userPanel);
 			}
 		};
 	}

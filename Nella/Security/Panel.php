@@ -29,7 +29,6 @@ class Panel extends \Nette\Object implements \Nette\Diagnostics\IBarPanel
 	{
 		$this->identity = $identity;
 		$this->container = $container;
-		\Nette\Diagnostics\Debugger::$bar->addPanel($this);
 	}
 
 	/**

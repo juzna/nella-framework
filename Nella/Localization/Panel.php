@@ -38,8 +38,6 @@ class Panel extends \Nella\FreezableObject implements \Nette\Diagnostics\IBarPan
 		$this->extractor = new Extractor($translator);
 
 		$this->processRequests($container);
-
-		\Nette\Diagnostics\Debugger::$bar->addPanel($this);
 	}
 
 	/**
