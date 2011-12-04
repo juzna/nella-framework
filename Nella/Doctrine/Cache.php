@@ -14,7 +14,7 @@ namespace Nella\Doctrine;
  *
  * @author	Patrik Votoček
  */
-class Cache extends \Doctrine\Common\Cache\AbstractCache
+class Cache implements \Doctrine\Common\Cache\Cache
 {
 	/** @var \Nette\Caching\Cache */
 	private $data = array();
@@ -38,7 +38,7 @@ class Cache extends \Doctrine\Common\Cache\AbstractCache
     /**
      * {@inheritdoc}
      */
-    protected function _doFetch($id)
+	public function fetch($id)
     {
         $data = $this->data->load($id);
 		return $data ?: FALSE;
@@ -47,7 +47,7 @@ class Cache extends \Doctrine\Common\Cache\AbstractCache
     /**
      * {@inheritdoc}
      */
-    protected function _doContains($id)
+	public function contains($id)
     {
         return $this->data->load($id) !== NULL;
     }
@@ -55,7 +55,7 @@ class Cache extends \Doctrine\Common\Cache\AbstractCache
     /**
      * {@inheritdoc}
      */
-    protected function _doSave($id, $data, $lifeTime = 0)
+	public function save($id, $data, $lifeTime = 0)
     {
 		$files = array();
 		if ($data instanceof \Doctrine\ORM\Mapping\ClassMetadata) {
@@ -79,9 +79,37 @@ class Cache extends \Doctrine\Common\Cache\AbstractCache
     /**
      * {@inheritdoc}
      */
-    protected function _doDelete($id)
+	public function delete($id)
     {
         $this->data->save($id, NULL);
         return TRUE;
     }
+
+	/**
+	 * Retrieves cached information from data store
+	 *
+	 * The server's statistics array has the following values:
+	 *
+	 * - <b>hits</b>
+	 * Number of keys that have been requested and found present.
+	 *
+	 * - <b>misses</b>
+	 * Number of items that have been requested and not found.
+	 *
+	 * - <b>uptime</b>
+	 * Time that the server is running.
+	 *
+	 * - <b>memory_usage</b>
+	 * Memory used by this server to store items.
+	 *
+	 * - <b>memory_available</b>
+	 * Memory allowed to use for storage.
+	 *
+	 * @since   2.2
+	 * @var     array Associative array with server's statistics if available, NULL otherwise.
+	 */
+	function getStats()
+	{
+		// TODO: Implement getStats() method.
+	}
 }

@@ -154,18 +154,15 @@ class Container extends \Nella\Models\Container
 		\Doctrine\Common\Annotations\AnnotationRegistry::registerFile(
 			$context->params['libsDir'] . '/Doctrine/ORM/Mapping/Driver/DoctrineAnnotations.php'
 		);
-		
+
 		\Doctrine\Common\Annotations\AnnotationReader::addGlobalIgnoredName('service');
-		
-		$reader = new \Doctrine\Common\Annotations\AnnotationReader();
-		$reader->setDefaultAnnotationNamespace('Doctrine\ORM\Mapping\\');
-		$reader->setIgnoreNotImportedAnnotations(true);
-		$reader->setEnableParsePhpImports(false);
-		$storage = $context->hasService('annotationCache') ? $context->annotationCache : new Cache($context->cacheStorage);
-		$reader = new \Doctrine\Common\Annotations\CachedReader(
-			new \Doctrine\Common\Annotations\IndexedReader($reader), $storage
-		);
-		
+
+		$reader = new \Doctrine\Common\Annotations\SimpleAnnotationReader();
+		$reader->addNamespace('Doctrine\ORM\Mapping');
+
+		$cache = $context->hasService('annotationCache') ? $context->annotationCache : new Cache($context->cacheStorage);
+		$reader = new \Doctrine\Common\Annotations\CachedReader($reader, $cache);
+
 		return new Mapping\Driver\AnnotationDriver($reader, $context->params['doctrine-config']['entityDirs']);
 	}
 
@@ -239,6 +236,10 @@ class Container extends \Nella\Models\Container
 	 */
 	public static function createServiceEntityManager(DI\Container $context)
 	{
+		// Make sure doctrine container has been initialized
+		// UGLY: but nette doesn't support creating service from another service :(
+		$container = $context->doctrineContainer;
+
 		$evm = $context->eventManager;
 		if (key_exists('driver', $context->params['doctrine-config'])
 			 && $context->params['doctrine-config']['driver'] == "pdo_mysql"
@@ -248,6 +249,7 @@ class Container extends \Nella\Models\Container
 
 		$context->freeze();
 		$config = $context->params['doctrine-config'];
+
 		return \Doctrine\ORM\EntityManager::create($config, $context->configuration, $evm);
 	}
 
