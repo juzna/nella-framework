@@ -36,17 +36,17 @@ class Configurator extends \Nette\Configurator
 		$container = $this->getContainer();
 		$container->params += $params;
 
-		// Back compatability
+		// Back compatibility
 		Environment::setConfigurator($this);
 		Environment::setContext($container);
 
 		// Nella X-Powered
 		@header("X-Powered-By: Nette Framework with Nella"); // @ - headers may have been sent
 
-		// Upload dir (tmp files - Mupltiple File Uploader)
+		// Upload dir (tmp files - Multiple File Uploader)
 		$container->params['uploadDir'] = $container->expand("%tempDir%/uploads");
 
-		// File storage dirs (upoaded images and other files)
+		// File storage dirs (uploaded images and other files)
 		if (defined('STORAGE_DIR')) {
 			$container->params['storageDir'] = realpath(STORAGE_DIR);
 		} else {
@@ -58,7 +58,7 @@ class Configurator extends \Nette\Configurator
 		// Set session dir
 		ini_set('session.save_path', $container->expand("%tempDir%/sessions"));
 
-		// Init multilple file upload listener
+		// Init multiple file upload listener
 		Forms\Controls\MultipleFileUpload::register(
 			$container->httpRequest,
 			$container->expand($container->params['uploadDir'])
