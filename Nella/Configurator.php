@@ -81,7 +81,7 @@ class Configurator extends \Nette\Configurator
 			if (!$container->params['consoleMode'] && !$container->params['productionMode']) {
 				$bar = \Nette\Diagnostics\Debugger::$bar;
 				\Nella\Diagnostics\CallbackBarPanel::register($bar, $container);
-				\Nella\Diagnostics\VersionBarPanel::register($bar, $container->cacheStorage);
+				//\Nella\Diagnostics\VersionBarPanel::register($bar, $container->cacheStorage);
 				$bar->addPanel($container->debugPanel);
 				$bar->addPanel($container->translatorPanel);
 				$bar->addPanel($container->userPanel);
@@ -188,7 +188,10 @@ class Configurator extends \Nette\Configurator
 		    new \Doctrine\DBAL\Migrations\Tools\Console\Command\GenerateCommand(),
 		    new \Doctrine\DBAL\Migrations\Tools\Console\Command\MigrateCommand(),
 		    new \Doctrine\DBAL\Migrations\Tools\Console\Command\StatusCommand(),
-		    new \Doctrine\DBAL\Migrations\Tools\Console\Command\VersionCommand()
+		    new \Doctrine\DBAL\Migrations\Tools\Console\Command\VersionCommand(),
+
+			// App
+			new \App\Commands\InstallCommand(),
         ));
 	}
 

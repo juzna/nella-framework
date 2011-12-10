@@ -33,6 +33,7 @@ require_once __DIR__ . "/SplClassLoader.php";
 Nella\SplClassLoader::getInstance(array(
 	'Nella' => NELLA_FRAMEWORK_DIR,
 	'Doctrine' => LIBS_DIR . "/Doctrine",
+	'Doctrine\\DBAL\\Migrations' => LIBS_DIR . "/Doctrine/Migrations",
 	'Symfony' => LIBS_DIR . "/Symfony",
 ))->register();
 
