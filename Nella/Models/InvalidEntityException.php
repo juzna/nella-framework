@@ -10,7 +10,7 @@
 namespace Nella\Models;
 
 /**
- * Ivalid entity state exception
+ * Invalid entity state exception
  *
  * @author	Patrik Votoček
  */
@@ -35,5 +35,9 @@ class InvalidEntityException extends Exception
 	public function getErrors()
 	{
 		return $this->errors;
+	}
+
+	public function getDetails() {
+		return $this->getErrors();
 	}
 }
