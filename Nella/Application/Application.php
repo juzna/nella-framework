@@ -19,7 +19,12 @@ class Application extends \Nette\Application\Application
 	public function run()
 	{
 		if (PHP_SAPI == "cli") {
-			$this->getContext()->console->run();
+			if(@$_SERVER['argv'][1] === 'request') {
+				array_splice($_SERVER['argv'], 1, 1, array());
+				parent::run();
+			} else {
+				$this->getContext()->console->run();
+			}
 		} else {
 			parent::run();
 		}
