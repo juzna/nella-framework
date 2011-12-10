@@ -154,16 +154,28 @@ class Container extends \Nella\Models\Container
 		\Doctrine\Common\Annotations\AnnotationRegistry::registerFile(
 			$context->params['libsDir'] . '/Doctrine/ORM/Mapping/Driver/DoctrineAnnotations.php'
 		);
+		\Doctrine\Common\Annotations\AnnotationRegistry::registerAutoloadNamespace('Gedmo\\Mapping\\Annotation', LIBS_DIR);
 
 		\Doctrine\Common\Annotations\AnnotationReader::addGlobalIgnoredName('service');
 
-		$reader = new \Doctrine\Common\Annotations\SimpleAnnotationReader();
-		$reader->addNamespace('Doctrine\ORM\Mapping');
-
-		$cache = $context->hasService('annotationCache') ? $context->annotationCache : new Cache($context->cacheStorage);
-		$reader = new \Doctrine\Common\Annotations\CachedReader($reader, $cache);
+		$reader = self::createServiceAnnotationReader($context);
 
 		return new Mapping\Driver\AnnotationDriver($reader, $context->params['doctrine-config']['entityDirs']);
+	}
+
+	/**
+	 * @param \Nette\DI\Container
+	 * @return \Doctrine\Common\Annotations\CachedReader|\Doctrine\Common\Annotations\SimpleAnnotationReader
+	 */
+	public static function createServiceAnnotationReader(DI\Container $context)
+	{
+		$reader = new \Doctrine\Common\Annotations\SimpleAnnotationReader();
+		$reader->addNamespace('Doctrine\ORM\Mapping');
+		$reader->addNamespace('Gedmo\Mapping\Annotation');
+
+//		$cache = $context->hasService('annotationCache') ? $context->annotationCache : new Cache($context->cacheStorage);
+//		$reader = new \Doctrine\Common\Annotations\CachedReader($reader, $cache);
+		return $reader;
 	}
 
 	/**
