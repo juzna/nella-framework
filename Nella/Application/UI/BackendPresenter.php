@@ -77,51 +77,6 @@ abstract class BackendPresenter extends Presenter
 		$this->setLayout('backend');
 	}
 
-	/**
-	 * Is a method allowed for current user?
-	 *
-	 * @param string
-	 * @return bool
-	 */
-	protected function isAllowed($method)
-	{
-		$data = \Nella\Security\Authorizator::parseAnnotations(get_called_class(), $method);
-
-		$user = $this->getUser();
-		if (isset($data['role']) && !$user->isInRole($data['role'])) {
-			return FALSE;
-		}
-		if(!$data['resource'] && !$data['privilege']) {
-			return TRUE;
-		}
-
-		return $user->isAllowed($data['resource'], $data['privilege']);
-	}
-
-	/**
-	 * Component factory. Delegates the creation of components to a createComponent<Name> method.
-	 * @param  string
-	 * @return \Nette\ComponentModel\IComponent
-	 */
-	protected function createComponent($name)
-	{
-		$ucname = ucfirst($name);
-
-		$container = $this->getContext()->getService('components');
-		if ($container->hasComponent($name)) {
-			return $container->getComponent($name, $this);
-		}
-
-		$method = "createComponent" . $ucname;
-		if ($ucname !== $name && method_exists($this, $method) && $this->getReflection()->getMethod($method)->getName() === $method) {
-			if (!$this->isAllowed($method)) {
-				throw new \Nette\Application\ForbiddenRequestException;
-			}
-
-			return $this->$method($name);
-		}
-	}
-
 	public function handleLogout()
 	{
 		$this->getUser()->logout(TRUE);

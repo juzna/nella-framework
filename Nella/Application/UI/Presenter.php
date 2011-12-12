@@ -188,18 +188,75 @@ abstract class Presenter extends \Nette\Application\UI\Presenter
 	}
 
 	/**
+	 * Is a method allowed for current user?
+	 *
+	 * @param Reflector|string
+	 * @return bool
+	 */
+	protected function isAllowed($what)
+	{
+		if (is_string($what)) $reflector = new \Nette\Reflection\Method($this, $what);
+		elseif($what instanceof \Reflector) $reflector = $what;
+		else throw new \Nette\InvalidArgumentException("Expected reflector or method name");
+
+		$data = \Nella\Security\Authorizator::parseAnnotations($reflector);
+
+		$user = $this->getUser();
+		if (isset($data['role']) && !$user->isInRole($data['role'])) {
+			return FALSE;
+		}
+		if(!$data['resource'] && !$data['privilege']) {
+			return TRUE;
+		}
+
+		return $user->isAllowed($data['resource'], $data['privilege']);
+	}
+
+
+	/**
 	 * Component factory. Delegates the creation of components to a createComponent<Name> method.
 	 * @param  string
 	 * @return \Nette\ComponentModel\IComponent
 	 */
 	protected function createComponent($name)
 	{
+		$ucname = ucfirst($name);
+
 		$container = $this->getContext()->components;
 		if ($container->hasComponent($name)) {
-			return $container->getComponent($name, $this);
+			$component = $container->getComponent($name, $this);
+		} elseif ($ucname !== $name && method_exists($this, $method = "createComponent" . $ucname) && $this->getReflection()->getMethod($method)->getName() === $method) {
+			if (!$this->isAllowed($method)) {
+				throw new \Nette\Application\ForbiddenRequestException;
+			}
+
+			$component = $this->$method($name);
+		} else {
+			// Global components
+			$component = null;
+			foreach ((array) $this->context->params['namespaces'] as $ns) {
+				if (!class_exists($className = $ns . '\\' . $ucname)) continue;
+				$clsReflection = \Nette\Reflection\ClassType::from($className);
+				if (!$clsReflection->implementsInterface('Nette\ComponentModel\IComponent')) continue;
+				if (!$this->isAllowed($clsReflection)) {
+					throw new \Nette\Application\ForbiddenRequestException;
+				}
+
+				$component = new $className($this, $name);
+				break;
+			}
 		}
 
-		return parent::createComponent($name);
+		if (!$component && !isset($this->components[$name])) {
+			throw new \Nette\NotSupportedException("Component with name '$name' not found");
+		}
+
+		// Validate before returning
+		if (!$component instanceof \Nette\ComponentModel\IComponent && !isset($this->components[$name])) {
+			$class = get_class($this);
+			throw new \Nette\UnexpectedValueException("Method $class::$method() did not return or create the desired component.");
+		}
+		return $component;
 	}
 
 	/**
