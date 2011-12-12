@@ -40,11 +40,8 @@ class Configurator extends \Nette\Configurator
 		Environment::setConfigurator($this);
 		Environment::setContext($container);
 
-		// Nella X-Powered
-		@header("X-Powered-By: Nette Framework with Nella"); // @ - headers may have been sent
-
 		// Upload dir (tmp files - Multiple File Uploader)
-		$container->params['uploadDir'] = $container->expand("%tempDir%/uploads");
+		if(!isset($container->params['uploadDir'])) $container->params['uploadDir'] = $container->expand("%tempDir%/uploads");
 
 		// File storage dirs (uploaded images and other files)
 		if (defined('STORAGE_DIR')) {
@@ -65,7 +62,7 @@ class Configurator extends \Nette\Configurator
 		);
 
 		// Namespace prefixes
-		$container->params['namespaces'] = array(0 => 'App', 9 => 'Nella');
+		$container->params['namespaces'] = array(0 => 'App', 1 => 'CMS', 9 => 'Nella');
 		// Templates dirs (application parts dirs)
 		$container->params['templates'] = array(0 => $container->params['appDir'], 9 => NELLA_FRAMEWORK_DIR);
 		// Flash message types
