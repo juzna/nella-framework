@@ -126,6 +126,7 @@ abstract class Control extends \Nette\Application\UI\Control
 		foreach ($this->getPresenter()->context->params['templates'] as $dir) {
 			$files = array_merge($files, $generator($dir));
 		}
+		$files = array_merge($files, $generator(dirname($this->getReflection()->getFileName())));
 
 		if ($this->getContext()->hasService('debugPanel')) {
 			$this->getContext()->debugPanel->addTemplates(get_called_class(), $files);
