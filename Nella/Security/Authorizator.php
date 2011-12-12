@@ -53,35 +53,50 @@ class Authorizator extends \Nette\Security\Permission
 	}
 
 	/**
-	 * @param string
+	 * @param string|\Reflector
 	 * @param string
 	 * @return array
 	 */
 	public static function parseAnnotations($class, $method = NULL)
 	{
-		if (strpos($class, '::') !== FALSE && !$method) {
-			list($class, $method) = explode('::', $class);
+		/** @var \Nette\Reflection\ClassType|\Nette\Reflection\Method $pRef */
+
+		// First, find reflector and it's parent
+		if ($class instanceof \Reflector) { // reflector given, check what it is
+			$what = $class;
+
+			if ($what instanceof \ReflectionMethod) {
+				$ref = ($what instanceof Reflection\Method) ? $what : new Reflection\Method($what);
+				$pRef = $ref->getDeclaringClass();
+			} elseif ($what instanceof \ReflectionClass) {
+				$ref = $what;
+				$pRef = null;
+			} else throw new \Nette\InvalidArgumentException;
+
+		} elseif (is_string($class)) { // we have method name
+			if (strpos($class, '::') !== FALSE && !$method) {
+				list($class, $method) = explode('::', $class);
+			}
+
+			if (empty($method)) {
+				$ref = new Reflection\ClassType($class);
+				$pRef = null;
+			} else {
+				$ref = new Reflection\Method($class, $method);
+				$pRef = $ref->getDeclaringClass();
+			}
+		} else throw new \Nette\InvalidArgumentException;
+
+		$annotations = (array) $ref->getAnnotation('allowed');
+
+		$ret = array();
+		foreach (array(static::ROLE, static::RESOURCE, static::PRIVILEGE) as $type) {
+			if (isset($annotations[$type])) $ret[$type] = $annotations[$type];
+			elseif ($ref && $ref->hasAnnotation($type)) $ret[$type] = $ref->getAnnotation($type);
+			elseif ($pRef && $pRef->hasAnnotation($type)) $ret[$type] = $pRef->getAnnotation($type);
+			else $ret[$type] = null;
 		}
 
-		$ref = new Reflection\Method($class, $method);
-		$cRef = new Reflection\ClassType($class);
-		$anntations = (array)$ref->getAnnotation('allowed');
-
-		$role = isset($anntations['role']) ? $anntations['role']
-			: ($ref->hasAnnotation('role') ? $ref->getAnnotation('role') : NULL);
-
-		$resource = isset($anntations['resource']) ? $anntations['resource']
-			: ($ref->hasAnnotation('resource')
-			? $ref->getAnnotation('resource')
-				: ($cRef->hasAnnotation('resource') ? $cRef->getAnnotation('resource') : NULL));
-
-		$privilege = isset($anntations['privilege']) ? $anntations['privilege']
-			: ($ref->hasAnnotation('privilege') ? $ref->getAnnotation('privilege') : NULL);
-
-		return array(
-			static::ROLE => $role,
-			static::RESOURCE => $resource,
-			static::PRIVILEGE => $privilege,
-		);
+		return $ret;
 	}
 }
