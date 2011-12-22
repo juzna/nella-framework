@@ -55,17 +55,17 @@ abstract class BackendPresenter extends Presenter
 
 		$method = $this->formatActionMethod($this->getAction());
 		if ($ref->hasMethod($method) && !$this->isAllowed($method)) {
-			throw new \Nette\Application\ForbiddenRequestException;
+			throw new \Nette\Application\ForbiddenRequestException($this->privilegesRequired($method));
 		}
 		$method = $this->formatRenderMethod($this->getView());
 		if ($ref->hasMethod($method) && !$this->isAllowed($method)) {
-			throw new \Nette\Application\ForbiddenRequestException;
+			throw new \Nette\Application\ForbiddenRequestException($this->privilegesRequired($method));
 		}
 		$signal = $this->getSignal();
 		if ($signal) {
 			$method = $this->formatSignalMethod($signal[1]);
 			if ($ref->hasMethod($method) && !$this->isAllowed($method)) {
-				throw new \Nette\Application\ForbiddenRequestException;
+				throw new \Nette\Application\ForbiddenRequestException($this->privilegesRequired($method));
 			}
 		}
 	}

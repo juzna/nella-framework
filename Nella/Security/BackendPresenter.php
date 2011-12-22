@@ -24,7 +24,7 @@ class BackendPresenter extends \Nella\Application\UI\BackendPresenter
 
 	public function actionDefault()
 	{
-		$service = $this->getDoctrineContainer()->getService('Nella\Security\CredentialsEntity');
+		$service = $this->getDoctrineContainer()->getService(IdentityEntity::getClassName());
 		$this->users = $service->repository->findAll();
 	}
 

@@ -195,11 +195,7 @@ abstract class Presenter extends \Nette\Application\UI\Presenter
 	 */
 	protected function isAllowed($what)
 	{
-		if (is_string($what)) $reflector = new \Nette\Reflection\Method($this, $what);
-		elseif($what instanceof \Reflector) $reflector = $what;
-		else throw new \Nette\InvalidArgumentException("Expected reflector or method name");
-
-		$data = \Nella\Security\Authorizator::parseAnnotations($reflector);
+		$data = $this->privilegesRequired($what);
 
 		$user = $this->getUser();
 		if (isset($data['role']) && !$user->isInRole($data['role'])) {
@@ -210,6 +206,21 @@ abstract class Presenter extends \Nette\Application\UI\Presenter
 		}
 
 		return $user->isAllowed($data['resource'], $data['privilege']);
+	}
+
+	/**
+	 * What privileges are needed for a method or class?
+	 *
+	 * @param \Reflector|string $what
+	 * @return array
+	 */
+	protected function privilegesRequired($what)
+	{
+		if (is_string($what)) $reflector = new \Nette\Reflection\Method($this, $what);
+		elseif($what instanceof \Reflector) $reflector = $what;
+		else throw new \Nette\InvalidArgumentException("Expected reflector or method name");
+
+		return \Nella\Security\Authorizator::parseAnnotations($reflector);
 	}
 
 
@@ -227,7 +238,7 @@ abstract class Presenter extends \Nette\Application\UI\Presenter
 			$component = $container->getComponent($name, $this);
 		} elseif ($ucname !== $name && method_exists($this, $method = "createComponent" . $ucname) && $this->getReflection()->getMethod($method)->getName() === $method) {
 			if (!$this->isAllowed($method)) {
-				throw new \Nette\Application\ForbiddenRequestException;
+				throw new \Nette\Application\ForbiddenRequestException($this->privilegesRequired($method));
 			}
 
 			$component = $this->$method($name);
@@ -239,7 +250,7 @@ abstract class Presenter extends \Nette\Application\UI\Presenter
 				$clsReflection = \Nette\Reflection\ClassType::from($className);
 				if (!$clsReflection->implementsInterface('Nette\ComponentModel\IComponent')) continue;
 				if (!$this->isAllowed($clsReflection)) {
-					throw new \Nette\Application\ForbiddenRequestException;
+					throw new \Nette\Application\ForbiddenRequestException($this->privilegesRequired($clsReflection));
 				}
 
 				$component = new $className($this, $name);
