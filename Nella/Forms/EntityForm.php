@@ -53,4 +53,51 @@ class EntityForm extends Form
 		}
 		return parent::setDefaults($arr, $erase);
 	}
+
+	/**
+	 * Populate entity with data from this form
+	 *
+	 * @param \Nella\Models\IEntity $object
+	 */
+	function populateEntity(\Nella\Models\IEntity $object)
+	{
+		foreach ($this->controls as /** @var \Nette\Forms\Controls\BaseControl $control */ $control) {
+			if ($binding = $control->getDataBinding()) {
+				$this->populateEntityField($object, $binding, $control->getValue());
+			}
+		}
+	}
+
+	/**
+	 * Populate one field of entity with a given value
+	 *
+	 * @param \Nella\Models\IEntity $object
+	 * @param string $property
+	 * @param mixed $value
+	 */
+	function populateEntityField(\Nella\Models\IEntity $object, $property, $value)
+	{
+		$ident = '[a-zA-Z0-9_]+';
+
+		if (preg_match("/^$ident$/i", $property)) { // simple property
+			$object->$property = $value;
+
+		} elseif (preg_match("/^($ident)(?:\\[($ident)\\])?(?:\\.(.+))?$/i", $property, $match)) { // property[index].x
+			$baseName = $match[1];
+			$index = isset($match[2]) ? $match[2] : null;
+			$hasSubProperty = isset($match[3]);
+
+			if ($hasSubProperty) { // recurse
+				$subProperty = $match[3];
+
+				$ref = $object->$baseName;
+				if ($index !== null) $ref = $ref[$index];
+
+				$this->populateEntityField($ref, $subProperty, $value);
+			} else { // no sub-property, assign directly to index
+				if ($index === null) throw new \Nette\InvalidStateException('Should never happen!');
+				$object->$property[$index] = $value;
+			}
+		}
+	}
 }

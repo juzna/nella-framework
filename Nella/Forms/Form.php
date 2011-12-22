@@ -13,6 +13,8 @@ namespace Nella\Forms;
  * Nella forms
  *
  * @author	Patrik Votoček
+ *
+ * @method \Nella\Application\UI\Presenter getPresenter()
  */
 class Form extends \Nette\Application\UI\Form
 {
