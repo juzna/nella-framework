@@ -110,9 +110,14 @@ class IdentityEntity extends \Nette\Object implements \Nella\Models\IEntity, \Ne
 	 */
 	public function getRoles()
 	{
-		return array_map(function(RoleEntity $role) {
-			return $role->name;
-		}, $this->roles->toArray());
+		$roles = array();
+		foreach ($this->roles as $role) {
+			do {
+				$roles[] = $role->name;
+			} while ($role = $role->parent);
+		}
+
+		return $roles;
 	}
 
 	/**
