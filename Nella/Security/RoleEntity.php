@@ -33,28 +33,32 @@ class RoleEntity extends \Nella\Doctrine\Entity implements \Nette\Security\IRole
 	 * @var string
 	 */
 	private $name;
+
 	/**
      * @manyToOne(targetEntity="RoleEntity", inversedBy="children")
      * @joinColumn(name="parent_id", referencedColumnName="id", onDelete="CASCADE")
 	 * @var RoleEntity
 	 */
 	private $parent;
+
 	/**
      * @oneToMany(targetEntity="RoleEntity", mappedBy="parent", cascade={"all"})
 	 * @var \Doctrine\Common\Collections\ArrayCollection
      */
 	private $children;
+
 	/**
 	 * @oneToMany(targetEntity="PermissionEntity", mappedBy="role", cascade={"all"})
 	 * @var array
 	 */
 	private $permissions;
 
-	public function __construct()
+	public function __construct($name = null)
 	{
 		parent::__construct();
 		$this->permissions = new ArrayCollection;
 		$this->children = new ArrayCollection;
+		$this->name = $name;
 	}
 
 	/**

@@ -13,15 +13,19 @@ namespace Nella\Security;
  * Identity entity
  *
  * @author	Patrik Votoček
+ * @author  Jan Dolecek
  *
  * @entity
  * @table(name="acl_users")
  * @service(class="Nella\Security\IdentityService")
  * @hasLifecycleCallbacks
  *
- * @property RoleEntity $role
  * @property string $lang
  * @property string $displayName
+ * @property string $email
+ * @property RoleEntity[] $roleEntities
+ * @property string[] $roles
+ * @property CredentialsEntity[] $credentials
  */
 class IdentityEntity extends \Nette\Object implements \Nella\Models\IEntity, \Nette\Security\IIdentity, \Serializable
 {
@@ -33,30 +37,45 @@ class IdentityEntity extends \Nette\Object implements \Nella\Models\IEntity, \Ne
 	private $id;
 
 	/**
-	 * @manyToOne(targetEntity="RoleEntity", fetch="EAGER")
-     * @joinColumn(name="role_id", referencedColumnName="id", nullable=false)
-	 * @var RoleEntity
-	 */
-	private $role;
-	/**
 	 * @column(length=5)
 	 * @var string
 	 */
 	private $lang;
+
 	/**
 	 * @column
 	 * @var string
 	 */
 	private $displayName;
+
+	/**
+	 * @column
+	 * @var string
+	 */
+	private $email;
+
+	/**
+	 * @manyToMany(targetEntity="RoleEntity", fetch="EAGER")
+	 * @joinTable(name="acl_user_roles")
+	 * @var \Doctrine\Common\Collections\ArrayCollection
+	 */
+	private $roles;
+
+	/**
+	 * @oneToMany(targetEntity="CredentialsEntity", mappedBy="identity")
+	 */
+	private $credentials;
+
 	/**
 	 * @internal
 	 * @var bool
 	 */
 	private $loaded = FALSE;
 
-	public function __construct()
-	{
 
+	public function __construct() {
+		$this->roles = new \Doctrine\Common\Collections\ArrayCollection;
+		$this->credentials = new \Doctrine\Common\Collections\ArrayCollection;
 	}
 
 	/**
@@ -68,20 +87,20 @@ class IdentityEntity extends \Nette\Object implements \Nella\Models\IEntity, \Ne
 	}
 
 	/**
-	 * @return RoleEntity
+	 * @return RoleEntity[]
 	 */
-	public function getRole()
+	public function getRoleEntities()
 	{
-		return $this->role;
+		return $this->roles;
 	}
 
 	/**
 	 * @param RoleEntity
 	 * @return IdentityEntity
 	 */
-	public function setRole(RoleEntity $role)
+	public function addRole(RoleEntity $role)
 	{
-		$this->role = $role;
+		$this->roles[] = $role;
 		return $this;
 	}
 
@@ -91,7 +110,9 @@ class IdentityEntity extends \Nette\Object implements \Nella\Models\IEntity, \Ne
 	 */
 	public function getRoles()
 	{
-		return array($this->getRole());
+		return array_map(function(RoleEntity $role) {
+			return $role->name;
+		}, $this->roles->toArray());
 	}
 
 	/**
@@ -128,6 +149,22 @@ class IdentityEntity extends \Nette\Object implements \Nella\Models\IEntity, \Ne
 	{
 		$this->displayName = $this->sanitizeString($displayName);
 		return $this;
+	}
+
+	/**
+	 * @param string $email
+	 * @return IdentityEntity
+	 */
+	public function setEmail($email) {
+		$this->email = $email;
+		return $this;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getEmail() {
+		return $this->email;
 	}
 
 	/**
@@ -172,5 +209,27 @@ class IdentityEntity extends \Nette\Object implements \Nella\Models\IEntity, \Ne
 	{
 		$s = trim($s);
 		return $s === "" ? NULL : $s;
+	}
+
+	/**
+	 * @return CredentialsEntity[]
+	 */
+	public function getCredentials() {
+		return $this->credentials;
+	}
+
+	public function addCredentials(CredentialsEntity $cred) {
+		$this->credentials[] = $cred;
+	}
+
+	public function removeCredentials(CredentialsEntity $cred) {
+		$this->credentials->removeElement($cred);
+	}
+
+	/**
+	 * @param CredentialsEntity[] $cred
+	 */
+	public function setCredentials(array $cred) {
+		$this->credentials = new \Doctrine\Common\Collections\ArrayCollection($cred);
 	}
 }

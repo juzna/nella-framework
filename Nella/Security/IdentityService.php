@@ -10,7 +10,7 @@
 namespace Nella\Security;
 
 /**
- * Identity model service
+ * Identity model servicem
  *
  * @author	Patrik Votoček
  */
@@ -25,13 +25,21 @@ class IdentityService extends \Nella\Doctrine\Service
 	public function create($values, $withoutFlush = FALSE)
 	{
 		try {
+			$em = $this->getEntityManager();
+
 			if (!$values['role'] instanceof \Nella\Security\RoleEntity) {
-				$roleService = $this->getContainer()->getService('Nella\Security\RoleEntity');
+				$roleService = $this->getContainer()->getService(RoleEntity::getClassName());
 				$values['role'] = $roleService->repository->find($values['role']);
+				if (!$values['role']) throw new \InvalidArgumentException("Given role does not exist");
+			}
+
+			if (!empty($values['username']) && !empty($values['password'])) {
+				$credService = $this->getContainer()->getService(PasswordEntity::getClassName());
+				$cred = $credService->create($values, TRUE);
+				$em->persist($cred);
 			}
 
 			$entity = parent::create($values, TRUE);
-			$em = $this->getEntityManager();
 			$em->persist($entity);
 			if (!$withoutFlush) {
 				$em->flush();

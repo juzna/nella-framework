@@ -10,8 +10,13 @@
 <h1>User: <?php echo htmlspecialchars($username) ?></h1>
 
 <div class="nette-inner" id="nella-callback-panel-content">
-	<h2>Role: <?php echo htmlspecialchars($role->name) ?>
-	<?php if ($role->parent) { echo " - " . htmlspecialchars($role->parent->name); } ?></h2>
+	<h2>Roles: <?php foreach($roles as $role) {
+		echo htmlspecialchars($role->name);
+		while ($role->parent) {
+			echo " - " . htmlspecialchars($role->parent->name);
+			$role = $role->parent;
+		}
+	} ?>
 	<?php /*<h2>Permissions</h2>
 	<table style="width: 100%">
 		<?php foreach ($permissions as $permission): ?>
