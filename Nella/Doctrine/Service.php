@@ -18,7 +18,7 @@ use Nella\Models\IEntity;
  *
  * @method Container getContainer()
  * @property-read \Doctrine\ORM\EntityManager $entityManager
- * @property-read \Doctrine\ORM\EntityRepository $repository
+ * @property-read \Nella\Doctrine\Repository $repository
  * @property-read \Doctrine\ORM\Mapping\ClassMetadata $classMetadata
  */
 class Service extends \Nella\Models\Service implements \Nella\Models\IService
