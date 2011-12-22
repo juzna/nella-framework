@@ -89,7 +89,7 @@ abstract class BaseDateTime extends \Nette\Forms\Controls\TextInput
 	 */
 	public static function validateValid(\Nette\Forms\IControl $control)
 	{
-		$value = $this->getValue();
+		$value = $control->getValue();
 		return (is_null($value) || $value instanceof \DateTime);
 	}
 
