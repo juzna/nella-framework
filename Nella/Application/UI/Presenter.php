@@ -277,4 +277,13 @@ abstract class Presenter extends \Nette\Application\UI\Presenter
 	{
 		return $this->getContext()->doctrineContainer;
 	}
+
+	/**
+	 * @param string $className
+	 * @return \Nella\Doctrine\Repository
+	 */
+	public function getRepository($className)
+	{
+		return $this->getDoctrineContainer()->getService($className)->getRepository();
+	}
 }
