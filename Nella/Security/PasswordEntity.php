@@ -37,10 +37,10 @@ class PasswordEntity extends CredentialsEntity
 	private $password;
 
 
-	public function __construct(IdentityEntity $identity, $username, $pass) {
+	public function __construct(IdentityEntity $identity, $username = null, $pass = null) {
 		parent::__construct($identity);
-		$this->setUsername($username);
-		$this->setPassword($pass);
+		if ($username !== null) $this->setUsername($username);
+		if ($pass !== null) $this->setPassword($pass);
 	}
 
 	/**

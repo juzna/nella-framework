@@ -18,7 +18,7 @@ class OpenIdEntity extends CredentialsEntity {
 	 */
 	private $openid;
 
-	public function __construct(IdentityEntity $identity, $openid) {
+	public function __construct(IdentityEntity $identity, $openid = null) {
 		parent::__construct($identity);
 		$this->openid = $openid;
 	}
