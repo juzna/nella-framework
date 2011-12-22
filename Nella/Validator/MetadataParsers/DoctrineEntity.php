@@ -86,7 +86,7 @@ class DoctrineEntity extends \Nette\Object implements \Nella\Validator\IMetadata
 
 					$metadata->addRule($field['fieldName'], Validator::INSTANCE, $field['targetEntity']);
 					$metadata->addRule($field['fieldName'],
-						$field['joinColumns'][0]['nullable'] ? Validator::NULLABLE : Validator::NOTNULL
+						!empty($field['joinColumns'][0]['nullable']) ? Validator::NULLABLE : Validator::NOTNULL
 					);
 				}
 			}
