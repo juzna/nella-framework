@@ -22,33 +22,50 @@ class AddUser extends \Nella\Forms\EntityForm
 	{
 		parent::setup();
 
-		$roles = $this->getDoctrineContainer()->getService('Nella\Security\RoleEntity')->repository->fetchPairs('id', "name");
+		$roles = $this->getDoctrineContainer()->getService(\Nella\Security\RoleEntity::getClassName())->repository->fetchPairs('id', "name");
 
-		$this->addText('username', "Username")->setRequired();
-		$this->addEmail('email', "E-mail")->setRequired();
-		$this->addPassword('password', "Password");
+		$this->addText('displayName', 'Name')->setRequired()->bind('displayName');
+		$this->addText('username', "Username")->setRequired()->bind('credentials[0].username');
+		$this->addEmail('email', "E-mail")->setRequired()->bind('email');
+		$this->addPassword('password', "Password")->bind('credentials[0].password');
 		$this->addPassword('password2', "Re-Password")->addCondition(static::FILLED)
 			->addRule(static::EQUAL, NULL, $this['password']);
-		$this->addSelect('role', "Role", $roles);
-		$this->addSelect('lang', "Lang", array('en' => "English"))->setRequired(); // @todo
+		$this->addMultiSelect('roles', "Roles", $roles);//->bind('roles');
+		$this->addSelect('lang', "Lang", array('en' => "English"))->setRequired()->bind('lang'); // @todo
 
 		$this->addSubmit('sub', "Add");
 
 		$this->onSuccess[] = callback($this, 'process');
 	}
 
+
 	public function process()
 	{
-		$values = $this->getValues();
-		$presenter = $this->getPresenter();
-		$service = $this->getDoctrineContainer()->getService('Nella\Security\CredentialsEntity');
+		// Create empty model
+		$user = new \Nella\Security\IdentityEntity;
+		$user->addCredentials($cred = new \Nella\Security\PasswordEntity($user));
+
+		// Populate it
+		$this->populateEntity($user);
+
+		// Store roles
+		$roleRepository = $this->getDoctrineContainer()->getService(\Nella\Security\RoleEntity::getClassName())->getRepository();
+		foreach ($this['roles']->getValue() as /** @var int $role */ $role) {
+			$user->addRole($roleRepository->find($role));
+		}
 
 		try {
-			$entity = $service->create($values);
-			$presenter->logAction("Security", \Nella\Utils\IActionLogger::CREATE, "Created user '{$entity->username}'");
-			$presenter->flashMessage(__("User '%s' successfuly added", $entity->username), 'success');
+			$em = $this->getDoctrineContainer()->getEntityManager();
+			$em->persist($user);
+			$em->persist($cred);
+			$em->flush();
+
+			$presenter = $this->getPresenter();
+			$presenter->logAction("Security", \Nella\Utils\IActionLogger::CREATE, "Created user '{$user->displayName}'");
+			$presenter->flashMessage(__("User '%s' successfully added", $user->displayName), 'success');
 			$presenter->redirect($this->successLink);
-		} catch (\Nella\Models\InvalidEntityException $e) {
+
+		} catch (\Nella\Models\InvalidEntityException $e) { // FIXME: will not get caught because PDOException is not mapped
 			$this->processErrors($e->getErrors());
 		} catch (\Nella\Models\DuplicateEntryException $e) {
 			$this['username']->addError("Username %value already exist");
