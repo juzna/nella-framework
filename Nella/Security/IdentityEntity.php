@@ -258,4 +258,8 @@ class IdentityEntity extends \Nette\Object implements \Nella\Models\IEntity, \Ne
 	public function setCredentials(array $cred) {
 		$this->credentials = new \Doctrine\Common\Collections\ArrayCollection($cred);
 	}
+
+	public function __toString() {
+		return $this->displayName;
+	}
 }
