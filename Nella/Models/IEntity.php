@@ -16,5 +16,5 @@ namespace Nella\Models;
  */
 interface IEntity
 {
-	function getId();
+	//function getId();
 }
