@@ -23,8 +23,7 @@ namespace Nella\Security;
  * @property string $lang
  * @property string $displayName
  * @property string $email
- * @property RoleEntity[] $roleEntities
- * @property string[] $roles
+ * @property RoleEntity[] $roles
  * @property CredentialsEntity[] $credentials
  */
 class IdentityEntity extends \Nette\Object implements \Nella\Models\IEntity, \Nette\Security\IIdentity, \Serializable
@@ -87,14 +86,6 @@ class IdentityEntity extends \Nette\Object implements \Nella\Models\IEntity, \Ne
 	}
 
 	/**
-	 * @return RoleEntity[]
-	 */
-	public function getRoleEntities()
-	{
-		return $this->roles;
-	}
-
-	/**
 	 * @param RoleEntity
 	 * @return IdentityEntity
 	 */
@@ -105,19 +96,49 @@ class IdentityEntity extends \Nette\Object implements \Nella\Models\IEntity, \Ne
 	}
 
 	/**
-	 * @internal
-	 * @return array
+	 * @param RoleEntity[] $roles
+	 * @return IdentityEntity
+	 */
+	public function setRoles(array $roles) {
+		$this->roles = $roles;
+		return $this;
+	}
+
+	/**
+	 * @param RoleEntity $role
+	 */
+	public function removeRole(RoleEntity $role) {
+		$this->roles->removeElement($role);
+	}
+
+	/**
+	 * @return RoleEntity[]
 	 */
 	public function getRoles()
 	{
+		return $this->roles->toArray();
+	}
+
+	/**
+	 * All roles within a tree hierarchy
+	 * @return RoleEntity[]
+	 */
+	public function getAllRoles() {
 		$roles = array();
 		foreach ($this->roles as $role) {
 			do {
-				$roles[] = $role->name;
+				$roles[] = $role;
 			} while ($role = $role->parent);
 		}
 
 		return $roles;
+	}
+
+	/**
+	 * @return string[]
+	 */
+	public function getAllRoleNames() {
+		return \Nette\Utils\Arrays::pluck($this->getAllRoles(), 'name');
 	}
 
 	/**

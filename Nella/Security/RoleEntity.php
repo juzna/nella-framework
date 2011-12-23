@@ -123,4 +123,8 @@ class RoleEntity extends \Nella\Doctrine\Entity implements \Nette\Security\IRole
 	{
 		return $this->permissions;
 	}
+
+	function __toString() {
+		return "[Role $this->name]";
+	}
 }

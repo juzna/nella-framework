@@ -61,7 +61,7 @@ class Panel extends \Nette\Object implements \Nette\Diagnostics\IBarPanel
 		}
 
 		ob_start();
-		$roles = $this->identity->roleEntities;
+		$roles = $this->identity->roles;
 		barDump($roles);
 		$username = $this->getUsername();
 		require_once __DIR__ . "/Panel.phtml";

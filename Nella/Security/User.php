@@ -307,7 +307,8 @@ class User extends \Nette\Object implements \Nette\Http\IUser
 		}
 
 		$identity = $this->getIdentity();
-		return $identity ? $identity->getRoles() : array($this->authenticatedRole);
+		if ($identity instanceof IdentityEntity) return $identity->getAllRoleNames();
+		else return $identity ? $identity->getRoles() : array($this->authenticatedRole);
 	}
 
 	/**
